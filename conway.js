@@ -1,10 +1,17 @@
 //requires class.js, djs.js
 
 var conway = Class({
-    djs: new djs(),
-    
-    init: function () {
+    init: function (cv) {
+        console.debug("Init com cv = "+cv);
         this.steps = 50;
+        this.djs = new djs(cv);
+        this.F = new Array(this.steps);
+        this.M = new Array(this.djs.worldY);
+        this.setupValues();
+        this.djs.createGrid();
+        this.initArray();
+        this.step();
+        this.drawFrame(0);
         
     },
     
@@ -24,10 +31,10 @@ var conway = Class({
 //      this.ct.clearRect(0,0,this.cvx,this.cvy); //Limpa o canvas
         this.djs.createGrid(); //Redraw the grid
 
-        for(y=0;y<this.worldY;y++) {
-            for(x=0;x<this.worldX;x++) {
+        for(y=0;y<this.djs.worldY;y++) {
+            for(x=0;x<this.djs.worldX;x++) {
               if(this.F[fr][y][x]==1) {
-                this.createCell(x,y);
+                this.djs.createCell(x,y);
               }
             }
         }
@@ -59,10 +66,10 @@ var conway = Class({
 	}
     },
 
-    iniArr: function () {
-      for(y=0;y<this.worldY;y++) {
-	this.M[y] = new Array(this.worldX);
-	for(x=0;x<this.worldX;x++) {
+    initArray: function () {
+      for(y=0;y<this.djs.worldY;y++) {
+	this.M[y] = new Array(this.djs.worldX);
+	for(x=0;x<this.djs.worldX;x++) {
 	  this.M[y][x] = Math.round(Math.random());
 	}
       }
@@ -74,15 +81,14 @@ var conway = Class({
     step: function () {
       for(_fr=1;_fr<this.steps;_fr++) {
 	this.F[_fr] = this.transformArray(this.F[_fr-1]); //Send array to "transform"
-	
       }
     },
 
     transformArray: function (arr) {
-      _arr_ret = new Array(this.worldY);
-      for (y=0;y<this.worldY;y++) {
-	_arr_ret[y] = new Array(this.worldX);
-	for (x=0;x<this.worldX;x++) {
+      _arr_ret = new Array(this.djs.worldY);
+      for (y=0;y<this.djs.worldY;y++) {
+	_arr_ret[y] = new Array(this.djs.worldX);
+	for (x=0;x<this.djs.worldX;x++) {
 	  _arr_ret[y][x] = this.iterate(arr,y,x);
 	}
       }
@@ -93,32 +99,32 @@ var conway = Class({
     iterate: function (arr,y,x) {
         _M = arr;
         
-        if(x==0 || y==0 || (x+1)==this.worldX || (y+1)==this.worldY) {
+        if(x==0 || y==0 || (x+1)==this.djs.worldX || (y+1)==this.djs.worldY) {
             if(y==0 && x==0) {
                 _factor = _M[y][x+1]+_M[y+1][x+1]+_M[y+1][x];
             }
-            else if((y+1)==this.worldY && (x+1)==this.worldX) {
+            else if((y+1)==this.djs.worldY && (x+1)==this.djs.worldX) {
                 _factor = _M[y][x-1]+_M[y-1][x-1]+_M[y-1][x];
             }
             else if(x==0) {
-                if((y+1)==this.worldY) {
+                if((y+1)==this.djs.worldY) {
                     _factor = _M[y-1][x]+_M[y-1][x+1]+_M[y][x+1];
                 } else {
                     _factor = _M[y-1][x]+_M[y-1][x+1]+_M[y][x+1]+_M[y+1][x+1]+_M[y+1][x];
                 }
             }
             else if(y==0) {
-                if((x+1)==this.worldX) {
+                if((x+1)==this.djs.worldX) {
                     _factor = _M[y][x-1]+_M[y+1][x-1]+_M[y+1][x];
                 } else {
                     _factor = _M[y][x-1]+_M[y+1][x-1]+_M[y+1][x]+_M[y+1][x+1]+_M[y][x+1];
                 }
             }
-            else if((x+1)==this.worldX) {
+            else if((x+1)==this.djs.worldX) {
                 _factor = _M[y-1][x]+_M[y-1][x-1]+_M[y][x-1]+_M[y+1][x-1]+_M[y+1][x];
             }
-            else if((y+1)==this.worldY) {
-                _fator = _M[y][x-1]+_M[y-1][x-1]+_M[y-1][x]+_M[y-1][x+1]+_M[y][x+1];
+            else if((y+1)==this.djs.worldY) {
+                _factor = _M[y][x-1]+_M[y-1][x-1]+_M[y-1][x]+_M[y-1][x+1]+_M[y][x+1];
             } else {
                 _factor = 50;
             }
@@ -131,7 +137,7 @@ var conway = Class({
             if (_factor<2) {
                 _destination = 0;
             }
-            else if (fator<=3) {
+            else if (_factor<=3) {
                 _destination = 1;
             } else {
                 _destination = 0;
